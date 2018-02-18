@@ -17,8 +17,6 @@ repository = "https://github.com/skade/leveldb"
 name = "leveldb"
 
 [dependencies]
-
-db-key = "0.0.5"
 libc = "0.2.4"
 
 [dependencies.leveldb-sys]

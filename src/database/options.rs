@@ -8,7 +8,6 @@ use leveldb_sys::*;
 
 use libc::size_t;
 use database::snapshots::Snapshot;
-use database::key::Key;
 use database::cache::Cache;
 
 pub use leveldb_sys::Compression;
@@ -95,7 +94,7 @@ impl WriteOptions {
 
 /// The read options to use for any read operation.
 #[allow(missing_copy_implementations)]
-pub struct ReadOptions<'a, K: Key + 'a> {
+pub struct ReadOptions<'a> {
     /// Whether to verify the saved checksums on read.
     ///
     /// default: false
@@ -111,12 +110,12 @@ pub struct ReadOptions<'a, K: Key + 'a> {
     /// this yourself.
     ///
     /// default: None
-    pub snapshot: Option<&'a Snapshot<'a, K>>,
+    pub snapshot: Option<&'a Snapshot<'a>>,
 }
 
-impl<'a, K: Key + 'a> ReadOptions<'a, K> {
+impl<'a> ReadOptions<'a> {
     /// Return a `ReadOptions` struct with the default values.
-    pub fn new() -> ReadOptions<'a, K> {
+    pub fn new() -> ReadOptions<'a> {
         ReadOptions {
             verify_checksums: false,
             fill_cache: true,
@@ -163,8 +162,7 @@ pub unsafe fn c_writeoptions(options: WriteOptions) -> *mut leveldb_writeoptions
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_readoptions<'a, K>(options: &ReadOptions<'a, K>) -> *mut leveldb_readoptions_t
-    where K: Key
+pub unsafe fn c_readoptions<'a>(options: &ReadOptions<'a>) -> *mut leveldb_readoptions_t
 {
     let c_readoptions = leveldb_readoptions_create();
     leveldb_readoptions_set_verify_checksums(c_readoptions, options.verify_checksums as u8);

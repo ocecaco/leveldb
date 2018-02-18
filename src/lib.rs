@@ -43,8 +43,8 @@
 #![crate_name = "leveldb"]
 #![deny(missing_docs)]
 
-extern crate libc;
 extern crate leveldb_sys;
+extern crate libc;
 
 use leveldb_sys::{leveldb_major_version, leveldb_minor_version};
 pub use database::options;
@@ -52,7 +52,6 @@ pub use database::error;
 pub use database::iterator;
 pub use database::snapshots;
 pub use database::comparator;
-pub use database::kv;
 pub use database::batch;
 pub use database::management;
 pub use database::compaction;
@@ -60,18 +59,22 @@ pub use database::compaction;
 #[allow(missing_docs)]
 pub mod database;
 
+/// Struct containing version information of LevelDB
+#[derive(Debug, Copy, Clone)]
+pub struct Version {
+    /// Major version
+    pub major: isize,
+    /// Minor version
+    pub minor: isize,
+}
+
 /// Library version information
 ///
 /// Need a recent version of leveldb to be used.
-
-pub trait Version {
-    /// The major version.
-    fn major() -> isize {
-        unsafe { leveldb_major_version() as isize }
-    }
-
-    /// The minor version
-    fn minor() -> isize {
-        unsafe { leveldb_minor_version() as isize }
+pub fn version() -> Version {
+    unsafe {
+        let major = leveldb_major_version() as isize;
+        let minor = leveldb_minor_version() as isize;
+        Version { major, minor }
     }
 }

@@ -9,8 +9,6 @@ pub struct Bytes {
     // it can't be null. (Because `NonZero` is unstable now.)
     bytes: &'static mut u8,
     size: usize,
-    // Tells the compiler that we own u8
-    _marker: ::std::marker::PhantomData<u8>,
 }
 
 impl Bytes {
@@ -24,7 +22,6 @@ impl Bytes {
             Some(Bytes {
                 bytes: &mut *ptr,
                 size: size,
-                _marker: Default::default(),
             })
         }
     }
@@ -34,7 +31,6 @@ impl Bytes {
         Bytes {
             bytes: &mut *ptr,
             size: size,
-            _marker: Default::default(),
         }
     }
 }
