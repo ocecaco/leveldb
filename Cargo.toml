@@ -1,5 +1,4 @@
 [package]
-
 name = "leveldb"
 version = "0.8.4"
 authors = [ "Florian Gilcher <florian.gilcher@asquera.de>" ]
@@ -24,6 +23,3 @@ path = "../leveldb-sys"
 
 [dev-dependencies]
 tempdir = "0.3.4"
-
-[[test]]
-name = "tests"
