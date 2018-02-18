@@ -11,6 +11,8 @@ use database::snapshots::Snapshot;
 use database::key::Key;
 use database::cache::Cache;
 
+pub use leveldb_sys::Compression;
+
 /// Options to consider when opening a new or pre-existing database.
 ///
 /// Note that in contrast to the leveldb C API, the Comparator is not

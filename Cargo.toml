@@ -14,7 +14,6 @@ homepage = "https://github.com/skade/leveldb"
 repository = "https://github.com/skade/leveldb"
 
 [lib]
-
 name = "leveldb"
 
 [dependencies]
@@ -23,8 +22,7 @@ db-key = "0.0.5"
 libc = "0.2.4"
 
 [dependencies.leveldb-sys]
-version = "2.0.0"
-features = ["snappy"]
+path = "../leveldb-sys"
 
 [dev-dependencies]
 tempdir = "0.3.4"
