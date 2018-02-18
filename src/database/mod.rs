@@ -6,6 +6,7 @@ use libc::{c_char, size_t};
 use leveldb_sys::*;
 use self::bytes::Bytes;
 use self::batch::Writebatch;
+use self::snapshots::{RawSnapshot, Snapshot};
 
 use options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
 use self::error::Error;
@@ -274,6 +275,20 @@ impl Database {
             } else {
                 Err(Error::new_from_i8(error))
             }
+        }
+    }
+
+    pub fn snapshot<'a>(&'a self) -> Snapshot<'a> {
+        let db_ptr = self.database.ptr;
+        let snap = unsafe { leveldb_create_snapshot(db_ptr) };
+
+        let raw = RawSnapshot {
+            db_ptr: db_ptr,
+            ptr: snap,
+        };
+        Snapshot {
+            raw: raw,
+            database: self,
         }
     }
 }
