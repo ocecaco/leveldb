@@ -77,7 +77,7 @@ impl Options {
 }
 
 /// The write options to use for a write operation.
-#[derive(Copy,Clone)]
+#[derive(Copy, Clone)]
 pub struct WriteOptions {
     /// `fsync` before acknowledging a write operation.
     ///
@@ -106,8 +106,8 @@ pub struct ReadOptions<'a> {
     pub fill_cache: bool,
     /// An optional snapshot to base this operation on.
     ///
-    /// Consider using the `Snapshot` trait instead of setting
-    /// this yourself.
+    /// Consider using the `snapshot` function on `Database`
+    /// instead of setting this yourself.
     ///
     /// default: None
     pub snapshot: Option<&'a Snapshot<'a>>,
@@ -125,9 +125,10 @@ impl<'a> ReadOptions<'a> {
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_options(options: &Options,
-                        comparator: Option<*mut leveldb_comparator_t>)
-                        -> *mut leveldb_options_t {
+pub unsafe fn c_options(
+    options: &Options,
+    comparator: Option<*mut leveldb_comparator_t>,
+) -> *mut leveldb_options_t {
     let c_options = leveldb_options_create();
     leveldb_options_set_create_if_missing(c_options, options.create_if_missing as u8);
     leveldb_options_set_error_if_exists(c_options, options.error_if_exists as u8);
@@ -162,8 +163,7 @@ pub unsafe fn c_writeoptions(options: WriteOptions) -> *mut leveldb_writeoptions
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_readoptions<'a>(options: &ReadOptions<'a>) -> *mut leveldb_readoptions_t
-{
+pub unsafe fn c_readoptions<'a>(options: &ReadOptions<'a>) -> *mut leveldb_readoptions_t {
     let c_readoptions = leveldb_readoptions_create();
     leveldb_readoptions_set_verify_checksums(c_readoptions, options.verify_checksums as u8);
     leveldb_readoptions_set_fill_cache(c_readoptions, options.fill_cache as u8);
