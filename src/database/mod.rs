@@ -112,7 +112,7 @@ impl Database {
             );
             leveldb_options_destroy(c_options);
 
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(Database::new(db, options, None))
             } else {
                 Err(Error::new_from_i8(error))
@@ -145,7 +145,7 @@ impl Database {
             );
             leveldb_options_destroy(c_options);
 
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(Database::new(db, options, Some(comp_ptr)))
             } else {
                 Err(Error::new_from_i8(error))
@@ -161,7 +161,7 @@ impl Database {
     ///
     /// The database will be synced to disc if `options.sync == true`. This is
     /// NOT the default.
-    pub fn put(&self, options: WriteOptions, key: &[u8], value: &[u8]) -> Result<(), Error> {
+    pub fn put(&self, options: &WriteOptions, key: &[u8], value: &[u8]) -> Result<(), Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let c_writeoptions = c_writeoptions(options);
@@ -176,7 +176,7 @@ impl Database {
             );
             leveldb_writeoptions_destroy(c_writeoptions);
 
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(())
             } else {
                 Err(Error::new_from_i8(error))
@@ -190,7 +190,7 @@ impl Database {
     ///
     /// The database will be synced to disc if `options.sync == true`. This is
     /// NOT the default.
-    pub fn delete(&self, options: WriteOptions, key: &[u8]) -> Result<(), Error> {
+    pub fn delete(&self, options: &WriteOptions, key: &[u8]) -> Result<(), Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let c_writeoptions = c_writeoptions(options);
@@ -202,7 +202,7 @@ impl Database {
                 &mut error,
             );
             leveldb_writeoptions_destroy(c_writeoptions);
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(())
             } else {
                 Err(Error::new_from_i8(error))
@@ -212,13 +212,13 @@ impl Database {
 
     pub fn get_bytes<'a>(
         &self,
-        options: ReadOptions<'a>,
+        options: &ReadOptions<'a>,
         key: &[u8],
     ) -> Result<Option<Bytes>, Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let mut length: size_t = 0;
-            let c_readoptions = c_readoptions(&options);
+            let c_readoptions = c_readoptions(options);
             let result = leveldb_get(
                 self.database.ptr,
                 c_readoptions,
@@ -229,7 +229,7 @@ impl Database {
             );
             leveldb_readoptions_destroy(c_readoptions);
 
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(Bytes::from_raw(result as *mut u8, length))
             } else {
                 Err(Error::new_from_i8(error))
@@ -237,11 +237,11 @@ impl Database {
         }
     }
 
-    pub fn get<'a>(&self, options: ReadOptions<'a>, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
+    pub fn get<'a>(&self, options: &ReadOptions<'a>, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
         self.get_bytes(options, key).map(|val| val.map(Into::into))
     }
 
-    pub fn iter<'a>(&'a self, options: ReadOptions<'a>) -> DatabaseIterator {
+    pub fn iter<'a>(&'a self, options: &ReadOptions<'a>) -> DatabaseIterator {
         DatabaseIterator::new(self, options)
     }
 
@@ -260,7 +260,7 @@ impl Database {
     pub fn write(&self, options: WriteOptions, batch: &Writebatch) -> Result<(), Error> {
         unsafe {
             let mut error = ptr::null_mut();
-            let c_writeoptions = c_writeoptions(options);
+            let c_writeoptions = c_writeoptions(&options);
 
             leveldb_write(
                 self.database.ptr,
@@ -270,7 +270,7 @@ impl Database {
             );
             leveldb_writeoptions_destroy(c_writeoptions);
 
-            if error == ptr::null_mut() {
+            if error.is_null() {
                 Ok(())
             } else {
                 Err(Error::new_from_i8(error))
@@ -278,7 +278,7 @@ impl Database {
         }
     }
 
-    pub fn snapshot<'a>(&'a self) -> Snapshot<'a> {
+    pub fn snapshot(&self) -> Snapshot {
         let db_ptr = self.database.ptr;
         let snap = unsafe { leveldb_create_snapshot(db_ptr) };
 

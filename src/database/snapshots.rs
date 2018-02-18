@@ -38,7 +38,7 @@ impl<'a> Snapshot<'a> {
     /// Inserts this snapshot into ReadOptions before reading
     pub fn get(
         &'a self,
-        mut options: ReadOptions<'a>,
+        options: &mut ReadOptions<'a>,
         key: &[u8],
     ) -> Result<Option<Vec<u8>>, Error> {
         options.snapshot = Some(self);
@@ -51,7 +51,7 @@ impl<'a> Snapshot<'a> {
         self.raw.ptr
     }
 
-    pub fn iter(&'a self, mut options: ReadOptions<'a>) -> DatabaseIterator {
+    pub fn iter(&'a self, options: &mut ReadOptions<'a>) -> DatabaseIterator {
         options.snapshot = Some(self);
         self.database.iter(options)
     }

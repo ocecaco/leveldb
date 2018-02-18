@@ -38,9 +38,9 @@ pub struct DatabaseIterator<'a> {
 }
 
 impl<'a> DatabaseIterator<'a> {
-    pub fn new(database: &'a Database, options: ReadOptions<'a>) -> DatabaseIterator<'a> {
+    pub fn new(database: &'a Database, options: &ReadOptions<'a>) -> DatabaseIterator<'a> {
         unsafe {
-            let c_readoptions = c_readoptions(&options);
+            let c_readoptions = c_readoptions(options);
             let ptr = leveldb_create_iterator(database.database.ptr, c_readoptions);
             leveldb_readoptions_destroy(c_readoptions);
             leveldb_iter_seek_to_first(ptr);

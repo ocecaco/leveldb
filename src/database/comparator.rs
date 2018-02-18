@@ -49,7 +49,7 @@ where
             let a_slice = slice::from_raw_parts::<u8>(a as *const u8, a_len as usize);
             let b_slice = slice::from_raw_parts::<u8>(b as *const u8, b_len as usize);
             let x = &*(state as *mut Self);
-            match x.compare(&a_slice, &b_slice) {
+            match x.compare(a_slice, b_slice) {
                 Ordering::Less => -1,
                 Ordering::Equal => 0,
                 Ordering::Greater => 1,

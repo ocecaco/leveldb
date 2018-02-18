@@ -156,7 +156,7 @@ pub unsafe fn c_options(
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_writeoptions(options: WriteOptions) -> *mut leveldb_writeoptions_t {
+pub unsafe fn c_writeoptions(options: &WriteOptions) -> *mut leveldb_writeoptions_t {
     let c_writeoptions = leveldb_writeoptions_create();
     leveldb_writeoptions_set_sync(c_writeoptions, options.sync as u8);
     c_writeoptions
@@ -168,7 +168,7 @@ pub unsafe fn c_readoptions<'a>(options: &ReadOptions<'a>) -> *mut leveldb_reado
     leveldb_readoptions_set_verify_checksums(c_readoptions, options.verify_checksums as u8);
     leveldb_readoptions_set_fill_cache(c_readoptions, options.fill_cache as u8);
 
-    if let Some(ref snapshot) = options.snapshot {
+    if let Some(snapshot) = options.snapshot {
         leveldb_readoptions_set_snapshot(c_readoptions, snapshot.raw_ptr());
     }
     c_readoptions
