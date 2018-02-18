@@ -3,14 +3,10 @@
 use leveldb_sys::*;
 use libc::{c_char, c_void, size_t};
 use std::slice;
-use options::{c_writeoptions, WriteOptions};
-use super::error::Error;
-use std::ptr;
-use super::Database;
 
 #[allow(missing_docs)]
-struct RawWritebatch {
-    ptr: *mut leveldb_writebatch_t,
+pub struct RawWritebatch {
+    pub ptr: *mut leveldb_writebatch_t,
 }
 
 impl Drop for RawWritebatch {
@@ -23,36 +19,7 @@ impl Drop for RawWritebatch {
 
 #[allow(missing_docs)]
 pub struct Writebatch {
-    #[allow(dead_code)] writebatch: RawWritebatch,
-}
-
-/// Batch access to the database
-pub trait Batch {
-    /// Write a batch to the database, ensuring success for all items or an error
-    fn write(&self, options: WriteOptions, batch: &Writebatch) -> Result<(), Error>;
-}
-
-impl Batch for Database {
-    fn write(&self, options: WriteOptions, batch: &Writebatch) -> Result<(), Error> {
-        unsafe {
-            let mut error = ptr::null_mut();
-            let c_writeoptions = c_writeoptions(options);
-
-            leveldb_write(
-                self.database.ptr,
-                c_writeoptions,
-                batch.writebatch.ptr,
-                &mut error,
-            );
-            leveldb_writeoptions_destroy(c_writeoptions);
-
-            if error == ptr::null_mut() {
-                Ok(())
-            } else {
-                Err(Error::new_from_i8(error))
-            }
-        }
-    }
+    pub writebatch: RawWritebatch,
 }
 
 impl Writebatch {

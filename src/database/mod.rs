@@ -5,6 +5,7 @@ use std::ffi::CString;
 use libc::{c_char, size_t};
 use leveldb_sys::*;
 use self::bytes::Bytes;
+use self::batch::Writebatch;
 
 use options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
 use self::error::Error;
@@ -252,6 +253,27 @@ impl Database {
                 limit.as_ptr() as *mut c_char,
                 limit.len() as size_t,
             );
+        }
+    }
+
+    pub fn write(&self, options: WriteOptions, batch: &Writebatch) -> Result<(), Error> {
+        unsafe {
+            let mut error = ptr::null_mut();
+            let c_writeoptions = c_writeoptions(options);
+
+            leveldb_write(
+                self.database.ptr,
+                c_writeoptions,
+                batch.writebatch.ptr,
+                &mut error,
+            );
+            leveldb_writeoptions_destroy(c_writeoptions);
+
+            if error == ptr::null_mut() {
+                Ok(())
+            } else {
+                Err(Error::new_from_i8(error))
+            }
         }
     }
 }
