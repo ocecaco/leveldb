@@ -10,6 +10,7 @@ use database::Database;
 use database::error::Error;
 use database::options::ReadOptions;
 use database::iterator::DatabaseIterator;
+use database::bytes::Bytes;
 
 #[allow(missing_docs)]
 pub struct RawSnapshot {
@@ -40,9 +41,9 @@ impl<'a> Snapshot<'a> {
         &'a self,
         options: &mut ReadOptions<'a>,
         key: &[u8],
-    ) -> Result<Option<Vec<u8>>, Error> {
+    ) -> Result<Option<Bytes>, Error> {
         options.snapshot = Some(self);
-        self.database.get(options, key)
+        self.database.get_bytes(options, key)
     }
 
     #[inline]
@@ -51,7 +52,7 @@ impl<'a> Snapshot<'a> {
         self.raw.ptr
     }
 
-    pub fn iter(&'a self, options: &mut ReadOptions<'a>) -> DatabaseIterator {
+    pub fn iter(&'a self, options: &mut ReadOptions<'a>) -> DatabaseIterator<'a> {
         options.snapshot = Some(self);
         self.database.iter(options)
     }

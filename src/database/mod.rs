@@ -211,8 +211,8 @@ impl Database {
     }
 
     pub fn get_bytes<'a>(
-        &self,
-        options: &ReadOptions<'a>,
+        &'a self,
+        options: &'a ReadOptions,
         key: &[u8],
     ) -> Result<Option<Bytes>, Error> {
         unsafe {
@@ -237,15 +237,11 @@ impl Database {
         }
     }
 
-    pub fn get<'a>(&self, options: &ReadOptions<'a>, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
-        self.get_bytes(options, key).map(|val| val.map(Into::into))
-    }
-
-    pub fn iter<'a>(&'a self, options: &ReadOptions<'a>) -> DatabaseIterator {
+    pub fn iter<'a>(&'a self, options: &ReadOptions<'a>) -> DatabaseIterator<'a> {
         DatabaseIterator::new(self, options)
     }
 
-    pub fn compact<'a>(&self, start: &'a [u8], limit: &'a [u8]) {
+    pub fn compact(&self, start: &[u8], limit: &[u8]) {
         unsafe {
             leveldb_compact_range(
                 self.database.ptr,
