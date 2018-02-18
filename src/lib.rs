@@ -54,7 +54,6 @@ pub use database::snapshots;
 pub use database::comparator;
 pub use database::batch;
 pub use database::management;
-pub use database::compaction;
 
 #[allow(missing_docs)]
 pub mod database;

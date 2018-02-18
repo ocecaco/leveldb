@@ -23,7 +23,6 @@ pub mod snapshots;
 pub mod cache;
 pub mod batch;
 pub mod management;
-pub mod compaction;
 pub mod bytes;
 
 #[allow(missing_docs)]
@@ -242,5 +241,17 @@ impl Database {
 
     pub fn iter<'a>(&'a self, options: ReadOptions<'a>) -> DatabaseIterator {
         DatabaseIterator::new(self, options)
+    }
+
+    pub fn compact<'a>(&self, start: &'a [u8], limit: &'a [u8]) {
+        unsafe {
+            leveldb_compact_range(
+                self.database.ptr,
+                start.as_ptr() as *mut c_char,
+                start.len() as size_t,
+                limit.as_ptr() as *mut c_char,
+                limit.len() as size_t,
+            );
+        }
     }
 }
