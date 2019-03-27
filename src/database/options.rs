@@ -7,8 +7,8 @@
 use leveldb_sys::*;
 
 use libc::size_t;
-use database::snapshots::Snapshot;
-use database::cache::Cache;
+use crate::database::snapshots::Snapshot;
+use crate::database::cache::Cache;
 
 pub use leveldb_sys::Compression;
 

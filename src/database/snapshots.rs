@@ -5,12 +5,12 @@
 use leveldb_sys::{leveldb_snapshot_t, leveldb_t};
 use leveldb_sys::leveldb_release_snapshot;
 
-use database::Database;
+use crate::database::Database;
 
-use database::error::Error;
-use database::options::ReadOptions;
-use database::iterator::DatabaseIterator;
-use database::bytes::Bytes;
+use crate::database::error::Error;
+use crate::database::options::ReadOptions;
+use crate::database::iterator::DatabaseIterator;
+use crate::database::bytes::Bytes;
 
 #[allow(missing_docs)]
 pub struct RawSnapshot {

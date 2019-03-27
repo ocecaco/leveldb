@@ -1,6 +1,6 @@
 //! Management functions, e.g. for destroying and reparing a database.
-use options::{c_options, Options};
-use error::Error;
+use crate::options::{c_options, Options};
+use crate::error::Error;
 use std::ffi::CString;
 use std::ptr;
 use std::path::Path;

@@ -43,17 +43,14 @@
 #![crate_name = "leveldb"]
 #![deny(missing_docs)]
 
-extern crate leveldb_sys;
-extern crate libc;
-
 use leveldb_sys::{leveldb_major_version, leveldb_minor_version};
-pub use database::options;
-pub use database::error;
-pub use database::iterator;
-pub use database::snapshots;
-pub use database::comparator;
-pub use database::batch;
-pub use database::management;
+pub use crate::database::options;
+pub use crate::database::error;
+pub use crate::database::iterator;
+pub use crate::database::snapshots;
+pub use crate::database::comparator;
+pub use crate::database::batch;
+pub use crate::database::management;
 
 #[allow(missing_docs)]
 pub mod database;

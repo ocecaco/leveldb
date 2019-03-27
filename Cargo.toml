@@ -2,6 +2,7 @@
 name = "leveldb"
 version = "0.8.4"
 authors = [ "Florian Gilcher <florian.gilcher@asquera.de>" ]
+edition = "2018"
 
 description = "An interface for leveldb"
 

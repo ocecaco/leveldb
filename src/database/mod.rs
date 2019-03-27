@@ -8,14 +8,14 @@ use self::bytes::Bytes;
 use self::batch::Writebatch;
 use self::snapshots::{RawSnapshot, Snapshot};
 
-use options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
+use crate::options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
 use self::error::Error;
 
 use std::path::Path;
 
 use std::ptr;
-use comparator::{create_comparator, Comparator};
-use iterator::DatabaseIterator;
+use crate::comparator::{create_comparator, Comparator};
+use crate::iterator::DatabaseIterator;
 
 pub mod options;
 pub mod error;
