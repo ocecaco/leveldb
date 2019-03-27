@@ -172,11 +172,7 @@ impl Database {
         }
     }
 
-    pub fn get_bytes<'a>(
-        &'a self,
-        options: &'a ReadOptions,
-        key: &[u8],
-    ) -> Result<Option<Bytes>, Error> {
+    pub fn get_bytes(&self, options: &ReadOptions, key: &[u8]) -> Result<Option<Bytes>, Error> {
         unsafe {
             let mut error = ptr::null_mut();
             let mut length: size_t = 0;
