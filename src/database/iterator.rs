@@ -2,15 +2,16 @@
 //!
 //! Iteration is one of the most important parts of leveldb. This module provides
 //! Iterators to iterate over key, values and pairs of both.
-use leveldb_sys::{leveldb_create_iterator, leveldb_iter_destroy, leveldb_iter_key,
-                  leveldb_iter_next, leveldb_iter_prev, leveldb_iter_seek,
-                  leveldb_iter_seek_to_first, leveldb_iter_seek_to_last, leveldb_iter_valid,
-                  leveldb_iter_value, leveldb_iterator_t, leveldb_readoptions_destroy};
-use libc::{c_char, size_t};
-use super::Database;
 use super::options::{c_readoptions, ReadOptions};
-use std::slice::from_raw_parts;
+use super::Database;
+use leveldb_sys::{
+    leveldb_create_iterator, leveldb_iter_destroy, leveldb_iter_key, leveldb_iter_next,
+    leveldb_iter_prev, leveldb_iter_seek, leveldb_iter_seek_to_first, leveldb_iter_seek_to_last,
+    leveldb_iter_valid, leveldb_iter_value, leveldb_iterator_t, leveldb_readoptions_destroy,
+};
+use libc::{c_char, size_t};
 use std::marker::PhantomData;
+use std::slice::from_raw_parts;
 
 /// An iterator over the leveldb keyspace.
 ///
@@ -18,12 +19,13 @@ use std::marker::PhantomData;
 pub struct DatabaseIterator<'a> {
     // Iterator accesses the Database through a leveldb_iter_t pointer
     // but needs to hold the reference for lifetime tracking
-    #[allow(dead_code)] database: PhantomData<&'a Database>,
+    #[allow(dead_code)]
+    database: PhantomData<&'a Database>,
     iter: *mut leveldb_iterator_t,
 }
 
 impl<'a> DatabaseIterator<'a> {
-    pub fn new(database: &'a Database, options: &ReadOptions<'a>) -> DatabaseIterator<'a> {
+    pub fn new(database: &'a Database, options: &ReadOptions) -> DatabaseIterator<'a> {
         unsafe {
             let c_readoptions = c_readoptions(options);
             let ptr = leveldb_create_iterator(database.database.ptr, c_readoptions);

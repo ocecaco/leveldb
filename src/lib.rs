@@ -43,14 +43,11 @@
 #![crate_name = "leveldb"]
 #![deny(missing_docs)]
 
-use leveldb_sys::{leveldb_major_version, leveldb_minor_version};
-pub use crate::database::options;
 pub use crate::database::error;
 pub use crate::database::iterator;
-pub use crate::database::snapshots;
-pub use crate::database::comparator;
-pub use crate::database::batch;
 pub use crate::database::management;
+pub use crate::database::options;
+use leveldb_sys::{leveldb_major_version, leveldb_minor_version};
 
 #[allow(missing_docs)]
 pub mod database;

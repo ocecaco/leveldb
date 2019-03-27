@@ -7,8 +7,6 @@
 use leveldb_sys::*;
 
 use libc::size_t;
-use crate::database::snapshots::Snapshot;
-use crate::database::cache::Cache;
 
 pub use leveldb_sys::Compression;
 
@@ -53,10 +51,6 @@ pub struct Options {
     ///
     /// default: Compression::No
     pub compression: Compression,
-    /// A cache to use during read operations.
-    ///
-    /// default: None
-    pub cache: Option<Cache>,
 }
 
 impl Options {
@@ -71,7 +65,6 @@ impl Options {
             block_size: None,
             block_restart_interval: None,
             compression: Compression::No,
-            cache: None,
         }
     }
 }
@@ -94,7 +87,7 @@ impl WriteOptions {
 
 /// The read options to use for any read operation.
 #[allow(missing_copy_implementations)]
-pub struct ReadOptions<'a> {
+pub struct ReadOptions {
     /// Whether to verify the saved checksums on read.
     ///
     /// default: false
@@ -104,22 +97,14 @@ pub struct ReadOptions<'a> {
     ///
     /// default: true
     pub fill_cache: bool,
-    /// An optional snapshot to base this operation on.
-    ///
-    /// Consider using the `snapshot` function on `Database`
-    /// instead of setting this yourself.
-    ///
-    /// default: None
-    pub snapshot: Option<&'a Snapshot<'a>>,
 }
 
-impl<'a> ReadOptions<'a> {
+impl ReadOptions {
     /// Return a `ReadOptions` struct with the default values.
-    pub fn new() -> ReadOptions<'a> {
+    pub fn new() -> ReadOptions {
         ReadOptions {
             verify_checksums: false,
             fill_cache: true,
-            snapshot: None,
         }
     }
 }
@@ -149,9 +134,6 @@ pub unsafe fn c_options(
     if let Some(c) = comparator {
         leveldb_options_set_comparator(c_options, c);
     }
-    if let Some(ref cache) = options.cache {
-        leveldb_options_set_cache(c_options, cache.raw_ptr());
-    }
     c_options
 }
 
@@ -163,13 +145,9 @@ pub unsafe fn c_writeoptions(options: &WriteOptions) -> *mut leveldb_writeoption
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_readoptions<'a>(options: &ReadOptions<'a>) -> *mut leveldb_readoptions_t {
+pub unsafe fn c_readoptions<'a>(options: &ReadOptions) -> *mut leveldb_readoptions_t {
     let c_readoptions = leveldb_readoptions_create();
     leveldb_readoptions_set_verify_checksums(c_readoptions, options.verify_checksums as u8);
     leveldb_readoptions_set_fill_cache(c_readoptions, options.fill_cache as u8);
-
-    if let Some(snapshot) = options.snapshot {
-        leveldb_readoptions_set_snapshot(c_readoptions, snapshot.raw_ptr());
-    }
     c_readoptions
 }

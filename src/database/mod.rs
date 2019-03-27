@@ -1,31 +1,24 @@
 //! The main database module, allowing to interface with leveldb on
 //! a key-value basis.
-use self::options::{c_options, Options};
-use std::ffi::CString;
-use libc::{c_char, size_t};
-use leveldb_sys::*;
 use self::bytes::Bytes;
-use self::batch::Writebatch;
-use self::snapshots::{RawSnapshot, Snapshot};
+use self::options::{c_options, Options};
+use leveldb_sys::*;
+use libc::{c_char, size_t};
+use std::ffi::CString;
 
-use crate::options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
 use self::error::Error;
+use crate::options::{c_readoptions, c_writeoptions, ReadOptions, WriteOptions};
 
 use std::path::Path;
 
-use std::ptr;
-use crate::comparator::{create_comparator, Comparator};
 use crate::iterator::DatabaseIterator;
+use std::ptr;
 
-pub mod options;
+pub mod bytes;
 pub mod error;
 pub mod iterator;
-pub mod comparator;
-pub mod snapshots;
-pub mod cache;
-pub mod batch;
 pub mod management;
-pub mod bytes;
+pub mod options;
 
 #[allow(missing_docs)]
 struct RawDB {
@@ -70,10 +63,12 @@ pub struct Database {
     database: RawDB,
     // this holds a reference passed into leveldb
     // it is never read from Rust, but must be kept around
-    #[allow(dead_code)] comparator: Option<RawComparator>,
+    #[allow(dead_code)]
+    comparator: Option<RawComparator>,
     // these hold multiple references that are used by the leveldb library
     // and should survive as long as the database lives
-    #[allow(dead_code)] options: Options,
+    #[allow(dead_code)]
+    options: Options,
 }
 
 unsafe impl Sync for Database {}
@@ -114,39 +109,6 @@ impl Database {
 
             if error.is_null() {
                 Ok(Database::new(db, options, None))
-            } else {
-                Err(Error::new_from_i8(error))
-            }
-        }
-    }
-
-    /// Open a new database with a custom comparator
-    ///
-    /// If the database is missing, the behaviour depends on `options.create_if_missing`.
-    /// The database will be created using the settings given in `options`.
-    ///
-    /// The comparator must implement a total ordering over the keyspace.
-    ///
-    /// For keys that implement Ord, consider the `OrdComparator`.
-    pub fn open_with_comparator<C: Comparator>(
-        name: &Path,
-        options: Options,
-        comparator: C,
-    ) -> Result<Database, Error> {
-        let mut error = ptr::null_mut();
-        let comp_ptr = create_comparator(Box::new(comparator));
-        unsafe {
-            let c_string = CString::new(name.to_str().unwrap()).unwrap();
-            let c_options = c_options(&options, Some(comp_ptr));
-            let db = leveldb_open(
-                c_options as *const leveldb_options_t,
-                c_string.as_bytes_with_nul().as_ptr() as *const i8,
-                &mut error,
-            );
-            leveldb_options_destroy(c_options);
-
-            if error.is_null() {
-                Ok(Database::new(db, options, Some(comp_ptr)))
             } else {
                 Err(Error::new_from_i8(error))
             }
@@ -237,7 +199,7 @@ impl Database {
         }
     }
 
-    pub fn iter<'a>(&'a self, options: &ReadOptions<'a>) -> DatabaseIterator<'a> {
+    pub fn iter<'a>(&'a self, options: &ReadOptions) -> DatabaseIterator<'a> {
         DatabaseIterator::new(self, options)
     }
 
@@ -250,41 +212,6 @@ impl Database {
                 limit.as_ptr() as *mut c_char,
                 limit.len() as size_t,
             );
-        }
-    }
-
-    pub fn write(&self, options: WriteOptions, batch: &Writebatch) -> Result<(), Error> {
-        unsafe {
-            let mut error = ptr::null_mut();
-            let c_writeoptions = c_writeoptions(&options);
-
-            leveldb_write(
-                self.database.ptr,
-                c_writeoptions,
-                batch.writebatch.ptr,
-                &mut error,
-            );
-            leveldb_writeoptions_destroy(c_writeoptions);
-
-            if error.is_null() {
-                Ok(())
-            } else {
-                Err(Error::new_from_i8(error))
-            }
-        }
-    }
-
-    pub fn snapshot(&self) -> Snapshot {
-        let db_ptr = self.database.ptr;
-        let snap = unsafe { leveldb_create_snapshot(db_ptr) };
-
-        let raw = RawSnapshot {
-            db_ptr: db_ptr,
-            ptr: snap,
-        };
-        Snapshot {
-            raw: raw,
-            database: self,
         }
     }
 }
