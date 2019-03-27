@@ -34,19 +34,6 @@ impl Drop for RawDB {
     }
 }
 
-#[allow(missing_docs)]
-struct RawComparator {
-    ptr: *mut leveldb_comparator_t,
-}
-
-impl Drop for RawComparator {
-    fn drop(&mut self) {
-        unsafe {
-            leveldb_comparator_destroy(self.ptr);
-        }
-    }
-}
-
 /// The main database object.
 ///
 /// leveldb databases are based on ordered keys. By default, leveldb orders
@@ -61,33 +48,15 @@ impl Drop for RawComparator {
 /// internally.
 pub struct Database {
     database: RawDB,
-    // this holds a reference passed into leveldb
-    // it is never read from Rust, but must be kept around
-    #[allow(dead_code)]
-    comparator: Option<RawComparator>,
-    // these hold multiple references that are used by the leveldb library
-    // and should survive as long as the database lives
-    #[allow(dead_code)]
-    options: Options,
 }
 
 unsafe impl Sync for Database {}
 unsafe impl Send for Database {}
 
 impl Database {
-    fn new(
-        database: *mut leveldb_t,
-        options: Options,
-        comparator: Option<*mut leveldb_comparator_t>,
-    ) -> Database {
-        let raw_comp = match comparator {
-            Some(p) => Some(RawComparator { ptr: p }),
-            None => None,
-        };
+    fn new(database: *mut leveldb_t) -> Database {
         Database {
             database: RawDB { ptr: database },
-            comparator: raw_comp,
-            options: options,
         }
     }
 
@@ -108,7 +77,7 @@ impl Database {
             leveldb_options_destroy(c_options);
 
             if error.is_null() {
-                Ok(Database::new(db, options, None))
+                Ok(Database::new(db))
             } else {
                 Err(Error::new_from_i8(error))
             }
