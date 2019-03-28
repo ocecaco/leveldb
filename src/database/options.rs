@@ -53,9 +53,9 @@ pub struct Options {
     pub compression: Compression,
 }
 
-impl Options {
+impl Default for Options {
     /// Create a new `Options` struct with default settings.
-    pub fn new() -> Options {
+    fn default() -> Options {
         Options {
             create_if_missing: false,
             error_if_exists: false,
@@ -78,9 +78,9 @@ pub struct WriteOptions {
     pub sync: bool,
 }
 
-impl WriteOptions {
+impl Default for WriteOptions {
     /// Return a new `WriteOptions` struct with default settings.
-    pub fn new() -> WriteOptions {
+    fn default() -> WriteOptions {
         WriteOptions { sync: false }
     }
 }
@@ -99,9 +99,9 @@ pub struct ReadOptions {
     pub fill_cache: bool,
 }
 
-impl ReadOptions {
+impl Default for ReadOptions {
     /// Return a `ReadOptions` struct with the default values.
-    pub fn new() -> ReadOptions {
+    fn default() -> ReadOptions {
         ReadOptions {
             verify_checksums: false,
             fill_cache: true,
@@ -138,6 +138,7 @@ pub unsafe fn c_options(
 }
 
 #[allow(missing_docs)]
+#[allow(clippy::trivially_copy_pass_by_ref)]
 pub unsafe fn c_writeoptions(options: &WriteOptions) -> *mut leveldb_writeoptions_t {
     let c_writeoptions = leveldb_writeoptions_create();
     leveldb_writeoptions_set_sync(c_writeoptions, options.sync as u8);
@@ -145,7 +146,7 @@ pub unsafe fn c_writeoptions(options: &WriteOptions) -> *mut leveldb_writeoption
 }
 
 #[allow(missing_docs)]
-pub unsafe fn c_readoptions<'a>(options: &ReadOptions) -> *mut leveldb_readoptions_t {
+pub unsafe fn c_readoptions(options: &ReadOptions) -> *mut leveldb_readoptions_t {
     let c_readoptions = leveldb_readoptions_create();
     leveldb_readoptions_set_verify_checksums(c_readoptions, options.verify_checksums as u8);
     leveldb_readoptions_set_fill_cache(c_readoptions, options.fill_cache as u8);

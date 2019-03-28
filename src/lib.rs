@@ -42,6 +42,7 @@
 #![crate_type = "lib"]
 #![crate_name = "leveldb"]
 #![deny(missing_docs)]
+#![warn(clippy::all)]
 
 pub use crate::database::error;
 pub use crate::database::iterator;

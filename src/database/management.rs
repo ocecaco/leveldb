@@ -1,9 +1,9 @@
 //! Management functions, e.g. for destroying and reparing a database.
-use crate::options::{c_options, Options};
 use crate::error::Error;
+use crate::options::{c_options, Options};
 use std::ffi::CString;
-use std::ptr;
 use std::path::Path;
+use std::ptr;
 
 use leveldb_sys::{leveldb_destroy_db, leveldb_repair_db};
 
@@ -19,7 +19,7 @@ pub fn destroy(name: &Path, options: &Options) -> Result<(), Error> {
             &mut error,
         );
 
-        if error == ptr::null_mut() {
+        if error.is_null() {
             Ok(())
         } else {
             Err(Error::new_from_i8(error))
@@ -39,7 +39,7 @@ pub fn repair(name: &Path, options: &Options) -> Result<(), Error> {
             &mut error,
         );
 
-        if error == ptr::null_mut() {
+        if error.is_null() {
             Ok(())
         } else {
             Err(Error::new_from_i8(error))

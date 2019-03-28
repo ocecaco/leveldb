@@ -54,7 +54,7 @@ unsafe impl Sync for Database {}
 unsafe impl Send for Database {}
 
 impl Database {
-    fn new(database: *mut leveldb_t) -> Database {
+    unsafe fn new(database: *mut leveldb_t) -> Database {
         Database {
             database: RawDB { ptr: database },
         }
@@ -92,6 +92,7 @@ impl Database {
     ///
     /// The database will be synced to disc if `options.sync == true`. This is
     /// NOT the default.
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn put(&self, options: &WriteOptions, key: &[u8], value: &[u8]) -> Result<(), Error> {
         unsafe {
             let mut error = ptr::null_mut();
@@ -121,6 +122,7 @@ impl Database {
     ///
     /// The database will be synced to disc if `options.sync == true`. This is
     /// NOT the default.
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     pub fn delete(&self, options: &WriteOptions, key: &[u8]) -> Result<(), Error> {
         unsafe {
             let mut error = ptr::null_mut();
